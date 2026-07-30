@@ -7,8 +7,8 @@ This project is built as a clean demonstration of how **LangChain** (LLM calls) 
 ## Features
 
 - 📤 Upload any CSV and preview it instantly
-- 💬 Ask questions about your data in plain English
-- 📈 Automatic statistics: rows, columns, missing values, mean/median/min/max, grouped summaries
+- 💬 Ask questions about your data in plain English and get a direct, accurate **Response** grounded in the real data (never guesses - if it's not in the CSV, it says so)
+- 📈 Automatic statistics: rows, columns, missing values, mean/median/min/max, grouped summaries, exact distinct-value counts
 - 📊 Automatic, question-relevant charts: bar, histogram, pie, scatter
 - 💡 AI-generated insights: trends, anomalies, business recommendations
 - 📄 A final downloadable markdown report combining everything
@@ -20,39 +20,45 @@ This project is built as a clean demonstration of how **LangChain** (LLM calls) 
 ```
 User Question + CSV
         |
-        v
-   [ LangGraph Pipeline ]
-        |
-     planner  (LangChain: structured output)
-      /    \
-statistics  visualization    <- parallel
-      \    /
-     insight   (LangChain: LLM + prompt)
-        |
-      report   (LangChain: LLM + prompt)
-        |
-        v
-  Streamlit UI displays results
+        +-------------------------------------------+
+        |                                            |
+        v                                            v
+ [ Query/Response Agent ]                    [ LangGraph Pipeline ]      <- runs ONCE, first question only
+ runs on EVERY question                              |
+ (LangChain: writes + executes a                  planner  (LangChain: structured output)
+  real pandas query, then phrases              /    \
+  the real result - never guesses)      statistics  visualization    <- parallel
+        |                                      \    /
+        v                                     insight   (LangChain: LLM + prompt)
+  Streamlit "Response" section                    |
+  (always open, always up to date)              report   (LangChain: LLM + prompt)
+                                                    |
+                                                    v
+                                     Statistics / Charts / Insights / Report
+                                          (collapsed, generated once)
 ```
 
-- **LangChain** ([LANGCHAIN_USAGE.md](LANGCHAIN_USAGE.md)) handles all LLM communication: prompts, structured output, parsing.
-- **LangGraph** ([LANGGRAPH_USAGE.md](LANGGRAPH_USAGE.md)) handles the agent pipeline: state, nodes, edges, and parallel execution.
+- **LangChain** ([docs/LANGCHAIN_USAGE.md](docs/LANGCHAIN_USAGE.md)) handles all LLM communication: prompts, structured output, parsing.
+- **LangGraph** ([docs/LANGGRAPH_USAGE.md](docs/LANGGRAPH_USAGE.md)) handles the agent pipeline: state, nodes, edges, and parallel execution.
 - **Streamlit** ([main.py](main.py)) handles the UI.
 
 ## Folder Structure
 
 ```
 project/
-├── main.py                  # Streamlit UI
-├── agents.py                 # LangChain logic (LLM, prompts, stats, charts)
-├── graph.py                  # LangGraph orchestration (state, nodes, edges)
-├── requirements.txt          # Python dependencies
-├── .env.example               # Template for your Groq API key
-├── sample_data.csv            # Example dataset to try the app with
-├── README.md                  # This file
-├── INSTALL.md                  # Step-by-step setup guide
-├── LANGCHAIN_USAGE.md           # Where/why LangChain is used
-└── LANGGRAPH_USAGE.md            # Where/why LangGraph is used
+├── main.py                     # Streamlit UI
+├── agent/
+│   ├── agents.py                # LangChain logic (LLM, prompts, stats, charts, query agent)
+│   └── graph.py                  # LangGraph orchestration (state, nodes, edges)
+├── data/
+│   └── sample_data.csv            # Example dataset to try the app with
+├── docs/
+│   ├── INSTALL.md                  # Step-by-step setup guide
+│   ├── LANGCHAIN_USAGE.md           # Where/why LangChain is used
+│   └── LANGGRAPH_USAGE.md            # Where/why LangGraph is used
+├── requirements.txt              # Python dependencies
+├── .env.example                    # Template for your Groq API key
+└── README.md                        # This file
 ```
 
 ## Screenshots
@@ -61,7 +67,7 @@ project/
 
 ## How to Run
 
-See [INSTALL.md](INSTALL.md) for full step-by-step instructions. Quick version:
+See [docs/INSTALL.md](docs/INSTALL.md) for full step-by-step instructions. Quick version:
 
 ```bash
 python -m venv .venv
@@ -75,7 +81,7 @@ Get a free Groq API key at [console.groq.com/keys](https://console.groq.com/keys
 
 ## Example Questions
 
-Try these with `sample_data.csv`:
+Try these with `data/sample_data.csv`:
 
 - Which product generated the highest revenue?
 - Which product sold the most?

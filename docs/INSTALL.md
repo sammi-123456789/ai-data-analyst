@@ -96,7 +96,7 @@ Your browser should automatically open to `http://localhost:8501`. If it doesn't
 
 ## 8. Try It Out
 
-1. In the sidebar, upload `sample_data.csv` (included in this project).
+1. In the sidebar, upload `data/sample_data.csv` (included in this project).
 2. Wait for the green "Loaded" confirmation.
 3. Type a question, e.g. *"Which product generated the highest revenue?"*
 4. Click **Analyze**.

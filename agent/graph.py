@@ -41,7 +41,7 @@ from typing import Any, Dict, List, Optional, TypedDict
 import pandas as pd
 from langgraph.graph import END, START, StateGraph
 
-import agents
+from agent import agents
 
 
 class AgentState(TypedDict, total=False):

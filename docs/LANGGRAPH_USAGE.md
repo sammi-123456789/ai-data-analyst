@@ -8,9 +8,9 @@ LangChain is great at talking to an LLM, but this app needs more than one LLM/lo
 
 LangGraph is built exactly for this: it lets us describe the pipeline as a graph of **nodes** (steps) connected by **edges** (the order they run in), all sharing one **state** object. This is what makes the flow easy to read, easy to extend, and easy to run partially in parallel.
 
-## All LangGraph code lives in [graph.py](graph.py)
+## All LangGraph code lives in [agent/graph.py](../agent/graph.py)
 
-`graph.py` never talks to the Groq API directly - it only calls functions from `agents.py` inside each node. This keeps orchestration (LangGraph) and LLM logic (LangChain) cleanly separated.
+`agent/graph.py` never talks to the Groq API directly - it only calls functions from `agent/agents.py` inside each node. This keeps orchestration (LangGraph) and LLM logic (LangChain) cleanly separated.
 
 ## The State
 
@@ -84,6 +84,22 @@ Then, notice that **both** `statistics` and `visualization` have an edge going i
 3. **statistics + visualization → insight**: Once both are done, the insight agent reads the statistics and writes plain-English findings.
 4. **insight → report**: The report agent combines statistics, chart titles, and insights into one markdown report.
 5. **report → END**: The final state (containing `statistics`, `charts`, `insights`, `report`) is returned to `main.py` for display.
+
+## Why The Response Isn't A Graph Node
+
+The UI also has a **Response** section that directly answers whatever
+question you type, every time. It is deliberately NOT part of this
+LangGraph pipeline - it's a single LangChain chain (`agents.run_query_agent`)
+that runs once per question, independent of the graph above.
+
+Why keep it separate: the pipeline above (planner → statistics/visualization
+→ insight → report) is meant to build one general **overview** of the
+dataset, and per the product requirement it only needs to run **once**
+(from your first question). Re-running that whole graph for every follow-up
+question would be slow and pointless. The Response, on the other hand,
+needs to change on every question, so `main.py` calls it directly instead of
+routing it through the graph. LangGraph is used where there's an actual
+multi-step pipeline to orchestrate; a single LLM lookup doesn't need one.
 
 ## Why This Matters (Advantages)
 

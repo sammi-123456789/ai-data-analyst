@@ -14,7 +14,7 @@ This document explains, in simple terms, where and why LangChain is used.
 
 ## Which File Uses LangChain?
 
-All LangChain code lives in **[agents.py](agents.py)**. `main.py` and `graph.py` never import `langchain` directly.
+All LangChain code lives in **[agent/agents.py](../agent/agents.py)**. `main.py` and `agent/graph.py` never import `langchain` directly.
 
 ## The Building Blocks Used
 
@@ -76,6 +76,34 @@ The `|` (pipe) syntax is LangChain's "chain" (aka LCEL - LangChain Expression La
 ### 5. Messages
 
 Every prompt is built from `system` and `human` messages, mirroring how chat-based LLMs actually work: the system message sets behavior/rules, the human message carries the real request and data.
+
+### 6. Grounded Query/Response Agent (accuracy-first Q&A)
+
+The Statistics/Insight/Report agents only ever look at a *summary* of the
+data (top-5 values, means, etc). That's not enough to answer a specific
+question like "how many countries are there?" or "tell me about Nepal"
+accurately - the summary might not even mention Nepal if it's not in the
+top 5.
+
+So there's a separate, always-on **Response** agent (`agents.run_query_agent`)
+that:
+
+1. Asks the LLM (via structured output) to write ONE pandas expression
+   that would compute the exact answer, e.g. `df['Country'].nunique()` or
+   `df[df['Country'].str.lower().str.contains('nepal')]`.
+2. Runs that expression against the **real, full** dataframe using a
+   restricted `eval()` (only `df`/`pd` are reachable, no imports, no file
+   or system access, an AST allow-list is checked first).
+3. Only then asks the LLM to phrase the *already-computed* real result into
+   a sentence - the LLM is never allowed to invent numbers, only read them
+   back.
+4. If the expression fails, it retries once with the error message. If it
+   still can't find an answer, it replies that the data doesn't contain it,
+   instead of guessing.
+
+This is why the Response updates every time you ask something, while the
+Statistics/Charts/Insights/Report overview is generated once from the first
+question and stays the same.
 
 ## Example Flow: The Insight Agent
 
