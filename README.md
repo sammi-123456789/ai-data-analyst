@@ -1,23 +1,22 @@
 # AI Data Analyst Agent
 
-[![Try it live](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://analysiscsv.streamlit.app/)
+🔗 **Try it live:** [analysiscsv.streamlit.app](https://analysiscsv.streamlit.app) - upload your own CSV or use one from `data/` and ask it anything.
 
-**🔗 Try it live: [analysiscsv.streamlit.app](https://analysiscsv.streamlit.app/)** - upload your own CSV or use one from `data/` and ask it anything.
+A simple, working AI agent that analyzes CSV data end-to-end: upload a file, ask a question in plain English, and get statistics, charts, AI-written insights, and a downloadable markdown report. Built with Streamlit, LangChain, LangGraph, and the Groq API.
 
-A simple, working demo of an AI agent that analyzes CSV data end-to-end: upload a file, ask a question in plain English, and get statistics, charts, AI-written insights, and a downloadable markdown report - all running locally with **Streamlit**, **LangChain**, **LangGraph**, and the **Groq** API.
-
-This project is built as a clean demonstration of how **LangChain** (LLM calls) and **LangGraph** (agent orchestration) work together in a real multi-agent pipeline.
+This project demonstrates how **LangChain** (LLM calls) and **LangGraph** (workflow orchestration) work together in a real agentic pipeline.
 
 ## Features
 
 - 📤 Upload any CSV and preview it instantly
-- 💬 Ask questions about your data in plain English and get a direct, accurate **Response** grounded in the real data (never guesses - if it's not in the CSV, it says so)
+- 💬 Ask questions about your data in plain English and get a direct, accurate response grounded in the real data (never guesses - if it's not in the CSV, it says so)
 - 📈 Automatic statistics: rows, columns, missing values, mean/median/min/max, grouped summaries, exact distinct-value counts
 - 📊 Automatic, question-relevant charts: bar, histogram, pie, scatter
 - 💡 AI-generated insights: trends, anomalies, business recommendations
 - 📄 A final downloadable markdown report combining everything
-- ⚡ Powered by Groq's `llama-3.3-70b-versatile` for fast responses
-- 🖥️ 100% local - no Docker, no database, nothing to deploy
+- 🛡️ Safe execution: every LLM-generated pandas expression is checked against an AST allow-list (no imports, file/system access, or private attributes) and run with restricted builtins
+- 🔁 Self-correction: if a generated query fails, the error is sent back to the LLM for one automatic retry
+- ⚡ Powered by Groq's `openai/gpt-oss-120b` for fast responses
 
 ## Architecture
 
@@ -43,8 +42,8 @@ User Question + CSV
 ```
 
 - **LangChain** ([docs/LANGCHAIN_USAGE.md](docs/LANGCHAIN_USAGE.md)) handles all LLM communication: prompts, structured output, parsing.
-- **LangGraph** ([docs/LANGGRAPH_USAGE.md](docs/LANGGRAPH_USAGE.md)) handles the agent pipeline: state, nodes, edges, and parallel execution.
-- **Streamlit** ([main.py](main.py)) handles the UI.
+- **LangGraph** ([docs/LANGGRAPH_USAGE.md](docs/LANGGRAPH_USAGE.md)) handles the workflow: state, nodes, edges, and parallel execution.
+- **Streamlit** (`main.py`) handles the UI.
 
 ## Folder Structure
 
@@ -52,22 +51,18 @@ User Question + CSV
 project/
 ├── main.py                     # Streamlit UI
 ├── agent/
-│   ├── agents.py                # LangChain logic (LLM, prompts, stats, charts, query agent)
-│   └── graph.py                  # LangGraph orchestration (state, nodes, edges)
+│   ├── agents.py               # LangChain logic (LLM, prompts, stats, charts, query agent)
+│   └── graph.py                # LangGraph orchestration (state, nodes, edges)
 ├── data/
-│   └── sample_data.csv            # Example dataset to try the app with
+│   └── sample_data.csv         # Example dataset to try the app with
 ├── docs/
-│   ├── INSTALL.md                  # Step-by-step setup guide
-│   ├── LANGCHAIN_USAGE.md           # Where/why LangChain is used
-│   └── LANGGRAPH_USAGE.md            # Where/why LangGraph is used
-├── requirements.txt              # Python dependencies
-├── .env.example                    # Template for your Groq API key
-└── README.md                        # This file
+│   ├── INSTALL.md              # Step-by-step setup guide
+│   ├── LANGCHAIN_USAGE.md      # Where/why LangChain is used
+│   └── LANGGRAPH_USAGE.md      # Where/why LangGraph is used
+├── requirements.txt            # Python dependencies
+├── .env.example                # Template for your Groq API key
+└── README.md                   # This file
 ```
-
-## Screenshots
-
-*(Add screenshots here after running the app locally - e.g. `screenshots/upload.png`, `screenshots/report.png`)*
 
 ## How to Run
 
@@ -103,21 +98,18 @@ Try these with `data/sample_data.csv`:
 
 | Technology | Purpose |
 |---|---|
-| [Streamlit](https://streamlit.io/) | Web UI |
-| [LangChain](https://python.langchain.com/) | LLM calls, prompts, structured output |
-| [LangGraph](https://langchain-ai.github.io/langgraph/) | Multi-agent orchestration |
-| [Groq](https://groq.com/) (`llama-3.3-70b-versatile`) | LLM inference |
-| [Pandas](https://pandas.pydata.org/) | Data analysis |
-| [Matplotlib](https://matplotlib.org/) | Charts |
+| Streamlit | Web UI |
+| LangChain | LLM calls, prompts, structured output |
+| LangGraph | Workflow orchestration (state, nodes, parallel execution) |
+| Groq (`openai/gpt-oss-120b`) | LLM inference |
+| Pandas | Data analysis |
+| Matplotlib | Charts |
 
 ## Future Improvements
 
-- Support Excel (`.xlsx`) and JSON uploads in addition to CSV
+- Run LLM-generated code in a fully isolated sandbox with time and memory limits
+- Support Excel (.xlsx) and JSON uploads in addition to CSV
 - Let users ask follow-up questions with conversation memory
 - Add more chart types (line charts for time series, box plots)
 - Cache LLM responses for repeated questions to save API calls
 - Export the final report as PDF in addition to markdown
-
----
-
-Built as a client demo to showcase LangChain + LangGraph working together in a real, runnable application.
